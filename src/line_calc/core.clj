@@ -1,6 +1,12 @@
+;;
+;; Simple expression calculator
+;;
+;; Create: 2016.11.07
+;; Update: 2016.11.07
+;; Author: warmworm
+;;
+
 (ns line-calc.core)
 
-(defn foo
-  "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
+(defn -main [& args]
+  (println "Hello, line-calc"))
