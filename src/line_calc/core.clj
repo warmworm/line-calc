@@ -11,5 +11,5 @@
 
 ; main function
 (defn -main [& args]
-  (create-ui))
+  (create-ui "line-calc"))
   
