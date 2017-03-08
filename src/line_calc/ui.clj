@@ -3,7 +3,7 @@
 ;;
 
 (ns line-calc.ui
-  (:import (javax.swing Box BoxLayout JFrame JPanel JOptionPane
+  (:import (javax.swing Box BoxLayout JFrame JPanel JOptionPane JLayeredPane
                         JTextArea JTextField JLabel JButton)
            (java.awt BorderLayout GridLayout FlowLayout
                      Container Component Dimension)
@@ -14,48 +14,57 @@
   ([frame msg]
    (JOptionPane/showMessageDialog frame msg)))
 
+(defn button [text w h handler]
+  (doto (JButton. text)
+    (.setSize (Dimension. w h))
+    (when (not= handler nil)
+      (.addActionListener handler))))
+
 ; create a calculator UI
-(defn create-ui [title]
-  (let [frame (JFrame. title)
-        log-panel (JPanel.)
-        panel (JPanel.)
-        log (JTextArea. 5 20)
-        label (JLabel. "Expression:")
-        exp (JTextField.)
-        button (JButton. "Eval")]
+(defn create-ui [title eval-func]
+  (let [frame (JFrame.)
+        layer-pane (JLayeredPane.)
+        exp-title (JLabel. "Expression:")
+        exp-input (JTextField. 512)
+        eval-button (JButton. "Eval")
+        eval-log (JTextArea. 5 20)]
 
-    ;(doto label
-    ;  (.setPreferredSize (Dimension. 150 50)))
+    (doto frame
+      (.setTitle title)
+      (.setSize 800 220)
+      (.setLayout nil)
+      (.setDefaultCloseOperation JFrame/EXIT_ON_CLOSE))
 
-    (doto log
-      (.setSize (Dimension. 300 300)))
+    (doto layer-pane
+      (.setBounds 0 0 800 220)
+      (.setLayout nil))
+
+    (doto exp-title
+      (.setBounds 10 10 100 30))
     
-    (doto exp
-      (.setSize (Dimension. 500 50))
-      (.setColumns 50)
-      (.setText "Input Expression"))
+    (doto exp-input
+      (.setBounds 110 10 500 30))
 
-    (doto button
-      (.setSize (Dimension. 150 50))
+    (doto eval-button
+      (.setBounds 660 10 120 30)
       (.addActionListener
        (proxy [ActionListener] []
          (actionPerformed [_]
-           (.append log (str (.getText exp) \newline))))))
+           (let [t (.getText exp-input)]
+             (.setText exp-input "")
+             (.append eval-log (str t \newline))
+             (eval-func t))))))
+    
+    (doto eval-log
+      (.setBounds 10 50 770 120))
 
-    (doto log-panel
-      (.setLayout (BorderLayout.))
-      (.add log BorderLayout/CENTER))
-    
-    (doto panel
-      (.setLayout (BorderLayout.))
-      (.add log-panel BorderLayout/NORTH)
-      (.add label BorderLayout/WEST)
-      (.add exp BorderLayout/CENTER)
-      (.add button BorderLayout/EAST))
-    
+    (doto layer-pane
+      (.add exp-title)
+      (.add exp-input)
+      (.add eval-button)
+      (.add eval-log))
+
     (doto frame
-      (.setDefaultCloseOperation JFrame/EXIT_ON_CLOSE)
-      (.setContentPane panel)
-      (.pack)
+      (.add layer-pane)
       (.setResizable false)
       (.setVisible true))))
